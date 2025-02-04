@@ -1,0 +1,5 @@
+package com.example.BitCoin.UserRepository;
+
+public class UserRepository {
+
+}

@@ -1,0 +1,78 @@
+package com.example.BitCoin.SecurityConfig;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+    
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	    http
+	        .csrf(csrf -> csrf.disable())
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers("/").permitAll()
+	            .requestMatchers("/login", "/perform_login").permitAll()
+	            .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+	            .requestMatchers("/error").permitAll()
+	            .requestMatchers("/WEB-INF/**").denyAll()
+	            .anyRequest().authenticated()
+	        )
+	        .formLogin(form -> form
+	            .loginPage("/login")
+	            .loginProcessingUrl("/perform_login")
+	            .defaultSuccessUrl("/home", true) // 로그인 후 /home으로 리디렉션
+	            .failureUrl("/login?error=true")
+	            .permitAll()
+	        )
+	        .logout(logout -> logout
+	            .logoutSuccessUrl("/login?logout=true")
+	            .permitAll()
+	        )
+	        .exceptionHandling(ex -> ex
+	            .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+	        )
+	        .and()
+	        .formLogin()
+	            .loginPage("/login")
+	            .successHandler((request, response, authentication) -> {
+	                // 이미 로그인된 사용자가 로그인 페이지로 접근하는 경우 홈 페이지로 리디렉션
+	                if (authentication.isAuthenticated()) {
+	                    response.sendRedirect("/home");
+	                }
+	            });
+
+	    return http.build();
+	}
+
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        var user = User.withUsername("user")
+                .password(passwordEncoder().encode("password"))
+                .roles("USER")
+                .build();
+        return new InMemoryUserDetailsManager(user);
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+}
+
+
