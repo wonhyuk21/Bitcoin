@@ -51,6 +51,6 @@ public class testController {
 	}
 	private void tests() {
 		// TODO Auto-generated method stub
-		// 테스트중
+		// 테스트중 2
 	}
 }
