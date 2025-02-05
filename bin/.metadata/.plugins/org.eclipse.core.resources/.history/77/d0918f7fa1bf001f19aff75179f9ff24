@@ -1,0 +1,61 @@
+package com.example.BitCoin.SecurityConfig;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	    http
+	        .csrf().disable()
+	        .authorizeRequests()
+	            .requestMatchers("/login").permitAll()  // 로그인 페이지는 누구나 접근 가능하도록 설정
+	            .requestMatchers("/admin/**").hasRole("ADMIN")  // "/admin" 경로는 ADMIN 권한 필요
+	            .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+	        .and()
+	        .formLogin()
+	            .loginPage("/login")  // 커스텀 로그인 페이지 경로
+	            .defaultSuccessUrl("/home", true)  // 로그인 후 리디렉션될 URL
+	            .permitAll()  // 로그인 페이지 접근을 모두 허용
+	        .and()
+	        .logout()
+	            .permitAll();  // 로그아웃도 모두 허용
+	    return http.build();
+	}
+
+
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails user = User.builder()
+                .username("user")
+                .password(passwordEncoder().encode("password"))
+                .roles("USER")
+                .build();
+
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder().encode("admin123"))
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+
+

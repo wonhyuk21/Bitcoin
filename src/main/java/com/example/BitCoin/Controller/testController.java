@@ -49,4 +49,8 @@ public class testController {
 	public String home() {
 		return "home";
 	}
+	private void tests() {
+		// TODO Auto-generated method stub
+		// 테스트중
+	}
 }
