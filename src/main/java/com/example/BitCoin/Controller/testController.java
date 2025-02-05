@@ -30,7 +30,7 @@ public class testController {
 			// 이미 인증된 사용자는 /home으로 리디렉션
 			return "redirect:/home";
 		}
-
+	
 		if (error != null) {
 			model.addAttribute("error", "로그인 실패!");
 		}
@@ -51,6 +51,8 @@ public class testController {
 	}
 	private void tests() {
 		// TODO Auto-generated method stub
-		// 테스트중 2
+		// 테스트중 3
+		// 테스트 4
+		// 테스트 5
 	}
 }
